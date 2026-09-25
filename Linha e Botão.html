@@ -1,0 +1,501 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Linha e Botão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gluten:wght@600;800&family=Figtree:wght@500;700&display=swap">
+<style>
+  /* Tema único e claro de propósito: tecido de linho sobre uma mesa jeans */
+  :root {
+    color-scheme: light;
+    --fundo: #dfe6ee;
+    --jeans: #34507a;
+    --jeans-escuro: #22385a;
+    --tinta: #1f2a3a;
+    --suave: #5b6778;
+    --papel: #f9fafc;
+    --linho: #efe6d6;
+  }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    background: var(--fundo);
+    color: var(--tinta);
+    font: 500 16px/1.45 "Figtree", system-ui, sans-serif;
+    padding-inline: 16px;
+    display: flex; justify-content: center;
+  }
+  .app { width: 100%; max-width: 560px; padding-block: 16px 28px; display: flex; flex-direction: column; gap: 14px; }
+  button { font: inherit; color: inherit; }
+
+  header { display: flex; align-items: center; gap: 12px; }
+  .etiqueta {
+    flex: none; width: 46px; height: 46px; border-radius: 50%;
+    background: var(--jeans);
+    border: 3px dashed #f2b705;
+    box-shadow: 0 0 0 3px var(--jeans);
+    display: grid; place-items: center;
+  }
+  .etiqueta i { width: 6px; height: 6px; border-radius: 50%; background: #f2b705; box-shadow: 10px 0 #f2b705, 0 10px #f2b705, 10px 10px #f2b705; translate: -5px -5px; }
+  h1 { margin: 0; font: 800 32px/1 "Gluten", "Comic Sans MS", cursive; color: var(--jeans-escuro); }
+  .sub { margin: 3px 0 0; color: var(--suave); font-size: 14px; }
+
+  .painel { display: flex; gap: 8px; flex-wrap: wrap; }
+  .info {
+    background: var(--papel);
+    border: 2px solid #c8d2de;
+    border-radius: 10px;
+    padding: 4px 12px;
+    display: flex; flex-direction: column; justify-content: center;
+    flex: 1 1 0; min-width: 0;
+  }
+  .info.fase { flex: 0 0 auto; flex-direction: row; align-items: center; padding: 2px; }
+  .info.fase > div { display: flex; flex-direction: column; align-items: center; padding: 2px 6px; }
+  .rotulo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--suave); white-space: nowrap; }
+  .valor { font: 800 21px/1.15 "Gluten", "Comic Sans MS", cursive; font-variant-numeric: tabular-nums; }
+  .seta { width: 30px; height: 38px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-size: 14px; }
+  .seta:hover:not(:disabled) { background: #e7ecf2; }
+  .seta:disabled { opacity: .25; cursor: default; }
+
+  .bastidor {
+    padding: 10px;
+    background: var(--jeans);
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 3px var(--jeans-escuro), 0 5px 0 var(--jeans-escuro);
+    outline: 2px dashed rgba(242,183,5,.7);
+    outline-offset: -6px;
+  }
+  canvas {
+    display: block; width: 100%; aspect-ratio: 1; max-width: 100%;
+    border-radius: 8px;
+    touch-action: none;
+    cursor: crosshair;
+    background: var(--linho);
+  }
+
+  .status { margin: 0; font-weight: 700; min-height: 1.45em; text-align: center; }
+  .status.ok { color: #2e8b46; }
+
+  .acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn {
+    flex: 1 1 120px; min-height: 46px;
+    border-radius: 12px;
+    border: 2px solid var(--jeans-escuro);
+    background: var(--papel);
+    font-weight: 700; font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--jeans-escuro);
+  }
+  .btn:active { transform: translateY(3px); box-shadow: none; }
+  .btn.forte { background: #f2b705; }
+  button:focus-visible { outline: 3px solid #f2b705; outline-offset: 3px; }
+
+  .regras { margin: 0; color: var(--suave); font-size: 15px; max-width: 62ch; }
+  .regras b { color: var(--tinta); }
+
+  .vitoria { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: rgba(31,42,58,.45); padding: 16px; }
+  .cartao {
+    background: var(--papel); border: 3px solid var(--jeans-escuro); border-radius: 16px;
+    padding: 18px 20px; text-align: center; max-width: 330px; width: 100%;
+    box-shadow: 0 6px 0 var(--jeans-escuro);
+    animation: surge .35s cubic-bezier(.3,1.6,.5,1);
+  }
+  @keyframes surge { from { transform: scale(.6); opacity: 0; } }
+  .cartao h2 { margin: 0; font: 800 28px/1.1 "Gluten", "Comic Sans MS", cursive; color: var(--jeans); }
+  .estrelas { font-size: 40px; letter-spacing: 6px; line-height: 1.1; margin: 8px 0 2px; }
+  .estrelas .on { color: #f2b705; }
+  .estrelas .off { color: #dde3ea; }
+  .cartao p { margin: 0 0 14px; color: var(--suave); }
+  .cartao .lista { display: grid; gap: 8px; }
+
+  @media (max-width: 420px) {
+    h1 { font-size: 27px; }
+    .valor { font-size: 18px; }
+    .info { padding: 4px 8px; }
+    .rotulo { letter-spacing: .04em; font-size: 10px; }
+    .bastidor { padding: 7px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .cartao { animation: none; } }
+</style>
+
+<div class="app">
+  <header>
+    <div class="etiqueta" aria-hidden="true"><i></i></div>
+    <div>
+      <h1>Linha e Botão</h1>
+      <p class="sub">Ligue os botões da mesma cor com fios de lã</p>
+    </div>
+  </header>
+
+  <div class="painel">
+    <div class="info fase">
+      <button class="seta" id="anterior" aria-label="Fase anterior">◀</button>
+      <div><span class="rotulo">Fase</span><span class="valor" id="nivel">1</span></div>
+      <button class="seta" id="proxima" aria-label="Próxima fase">▶</button>
+    </div>
+    <div class="info"><span class="rotulo">Ligados</span><span class="valor" id="ligados">0/0</span></div>
+    <div class="info"><span class="rotulo">Tecido</span><span class="valor" id="coberto">0%</span></div>
+    <div class="info"><span class="rotulo">Traços</span><span class="valor" id="tracos">0</span></div>
+  </div>
+
+  <div class="bastidor">
+    <canvas id="tela" aria-label="Tabuleiro: arraste de um botão até o outro da mesma cor"></canvas>
+  </div>
+
+  <p class="status" id="status" aria-live="polite"></p>
+
+  <div class="acoes">
+    <button class="btn forte" id="btnDica">Dica</button>
+    <button class="btn" id="btnLimpar">Limpar tudo</button>
+  </div>
+
+  <p class="regras">
+    <b>Arraste de um botão até o outro da mesma cor.</b> Os fios não podem se cruzar e precisam cobrir <b>o tecido inteiro</b>, sem deixar nenhum quadradinho vazio. Para corrigir um fio, comece a arrastar de qualquer ponto dele. Ligue cada cor de uma vez só para ganhar 3 estrelas.
+  </p>
+</div>
+
+<script>
+/* =========================================================
+   LINHA E BOTÃO — o jogo "Flow" (ligue as cores)
+   HTML + CSS + JavaScript puro, desenhado num <canvas>.
+   ========================================================= */
+
+const CORES = ["#e24b4b", "#2f6fd6", "#34a853", "#f2b705", "#f07c28", "#8e44ad", "#1fb5b0", "#e8559a", "#8b5a2b", "#7a8595"];
+
+/* ---------- Números aleatórios com semente ---------- */
+function criarAleatorio(semente) {
+  return function () {
+    semente |= 0; semente = (semente + 0x6D2B79F5) | 0;
+    let t = Math.imul(semente ^ (semente >>> 15), 1 | semente);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* ---------- Gerador de fases ----------
+   1. Faz UM caminho que passa por todas as casas (começa em zigue-zague).
+   2. Embaralha esse caminho com o truque do "backbite": pega uma ponta,
+      liga a um vizinho e desfaz uma ligação. Continua passando por todas as casas.
+   3. Corta o caminho em pedaços: cada pedaço é uma cor, e as pontas viram botões.
+   Como os pedaços cobrem tudo, sempre existe solução. */
+function gerarFase(nivel) {
+  const aleatorio = criarAleatorio(nivel * 69621 + 5);
+  const tam = Math.min(5 + Math.floor((nivel - 1) / 3), 9);
+  const qtdCores = Math.min(Math.max(tam - Math.floor((nivel - 1) / 5), Math.ceil(tam * 0.6)), CORES.length);
+
+  let caminho = [];
+  for (let r = 0; r < tam; r++)
+    for (let c = 0; c < tam; c++) caminho.push(r * tam + (r % 2 ? tam - 1 - c : c));
+
+  const vizinhos = i => {
+    const r = Math.floor(i / tam), c = i % tam, v = [];
+    if (r > 0) v.push(i - tam); if (r < tam - 1) v.push(i + tam);
+    if (c > 0) v.push(i - 1); if (c < tam - 1) v.push(i + 1);
+    return v;
+  };
+
+  const repeticoes = tam * tam * 40;
+  for (let k = 0; k < repeticoes; k++) {
+    if (aleatorio() < 0.5) caminho.reverse();
+    const fim = caminho[caminho.length - 1];
+    const vs = vizinhos(fim);
+    const n = vs[Math.floor(aleatorio() * vs.length)];
+    if (n === caminho[caminho.length - 2]) continue;
+    const pos = caminho.indexOf(n);
+    caminho = caminho.slice(0, pos + 1).concat(caminho.slice(pos + 1).reverse());
+  }
+
+  // Corta em pedaços de pelo menos 3 casas
+  const total = caminho.length;
+  const cortes = [];
+  for (let tentativa = 0; tentativa < 500 && cortes.length < qtdCores - 1; tentativa++) {
+    const c = 3 + Math.floor(aleatorio() * (total - 5));
+    if ([0, total, ...cortes].every(x => Math.abs(x - c) >= 3)) cortes.push(c);
+  }
+  cortes.sort((a, b) => a - b);
+  const pedacos = [];
+  let ini = 0;
+  for (const c of [...cortes, total]) { pedacos.push(caminho.slice(ini, c)); ini = c; }
+
+  // Sorteia qual cor fica em qual pedaço
+  const ordem = [...pedacos.keys()].sort(() => aleatorio() - 0.5);
+  const solucao = ordem.map(k => pedacos[k]);
+  return { tam, solucao };
+}
+
+/* ---------- Estado ---------- */
+const $ = id => document.getElementById(id);
+const tela = $("tela"), ctx = tela.getContext("2d");
+let jogo, arrastando = null;
+
+function lerProgresso() {
+  try { return JSON.parse(localStorage.getItem("linhaBotao")) || { nivel: 1, maximo: 1 }; }
+  catch { return { nivel: 1, maximo: 1 }; }
+}
+function salvarProgresso() { try { localStorage.setItem("linhaBotao", JSON.stringify(progresso)); } catch {} }
+let progresso = lerProgresso();
+
+function iniciarFase(nivel) {
+  document.querySelector(".vitoria")?.remove();
+  const f = gerarFase(nivel);
+  const botoes = new Map();
+  f.solucao.forEach((p, cor) => { botoes.set(p[0], cor); botoes.set(p[p.length - 1], cor); });
+  jogo = { nivel, tam: f.tam, solucao: f.solucao, botoes, fios: f.solucao.map(() => []), tracos: 0, ultimaCor: -1, venceu: false };
+  progresso.nivel = nivel; salvarProgresso();
+  ajustarTela();
+  atualizar();
+}
+
+/* ---------- Ajudantes ---------- */
+const dono = i => jogo.fios.findIndex(f => f.includes(i));
+const vizinhas = (a, b) => {
+  const t = jogo.tam;
+  const ra = Math.floor(a / t), ca = a % t, rb = Math.floor(b / t), cb = b % t;
+  return Math.abs(ra - rb) + Math.abs(ca - cb) === 1;
+};
+function ligado(cor) {
+  const f = jogo.fios[cor];
+  return f.length >= 2 && jogo.botoes.get(f[0]) === cor && jogo.botoes.get(f[f.length - 1]) === cor && f[0] !== f[f.length - 1];
+}
+
+/* ---------- Desenhar o fio com o dedo ---------- */
+function comecar(i) {
+  const corBotao = jogo.botoes.get(i);
+  let cor;
+  if (corBotao !== undefined) {
+    cor = corBotao;
+    jogo.fios[cor] = [i];                         // começa um fio novo do botão
+  } else {
+    cor = dono(i);
+    if (cor === -1) return;
+    const f = jogo.fios[cor];
+    jogo.fios[cor] = f.slice(0, f.indexOf(i) + 1); // continua de onde tocou
+  }
+  if (cor !== jogo.ultimaCor) { jogo.tracos++; jogo.ultimaCor = cor; }
+  arrastando = cor;
+  atualizar();
+}
+
+function estender(i) {
+  const cor = arrastando;
+  const f = jogo.fios[cor];
+  const ultima = f[f.length - 1];
+  if (i === ultima || !vizinhas(ultima, i)) return false;
+
+  const pos = f.indexOf(i);
+  if (pos >= 0) { jogo.fios[cor] = f.slice(0, pos + 1); return true; } // voltou: desfaz
+  if (ligado(cor)) return false;                                     // já chegou no outro botão
+
+  const corBotao = jogo.botoes.get(i);
+  if (corBotao !== undefined && corBotao !== cor) return false;      // botão de outra cor bloqueia
+
+  const outro = dono(i);                                             // fio de outra cor é cortado
+  if (outro !== -1 && outro !== cor) {
+    const g = jogo.fios[outro];
+    jogo.fios[outro] = g.slice(0, g.indexOf(i));
+  }
+  f.push(i);
+  return true;
+}
+
+// Se o dedo pular várias casas de uma vez, anda uma casa por vez até lá
+function arrastarAte(i) {
+  for (let passos = 0; passos < 30; passos++) {
+    const f = jogo.fios[arrastando];
+    const ultima = f[f.length - 1];
+    if (ultima === i) break;
+    if (f.includes(i) || vizinhas(ultima, i)) { estender(i); break; }
+    const t = jogo.tam;
+    const dr = Math.floor(i / t) - Math.floor(ultima / t), dc = i % t - ultima % t;
+    const prox = Math.abs(dr) >= Math.abs(dc) ? ultima + Math.sign(dr) * t : ultima + Math.sign(dc);
+    if (!estender(prox)) break;
+  }
+  atualizar();
+}
+
+/* ---------- Dica: coloca o fio certo de uma cor ---------- */
+function darDica() {
+  if (jogo.venceu) return;
+  const cor = jogo.solucao.findIndex((sol, c) => {
+    const f = jogo.fios[c];
+    return !ligado(c) || f.length !== sol.length || !sol.every(x => f.includes(x));
+  });
+  if (cor === -1) return;
+  const sol = jogo.solucao[cor];
+  jogo.fios.forEach((g, c) => {
+    if (c === cor) return;
+    const corte = g.findIndex(x => sol.includes(x));
+    if (corte >= 0) jogo.fios[c] = g.slice(0, corte);
+  });
+  jogo.fios[cor] = [...sol];
+  jogo.tracos++;
+  jogo.ultimaCor = cor;
+  atualizar();
+}
+
+/* ---------- Tela ---------- */
+let lado = 400, casa = 80;
+function ajustarTela() {
+  const larguraCss = tela.clientWidth || 400;
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  tela.width = Math.round(larguraCss * dpr);
+  tela.height = Math.round(larguraCss * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  lado = larguraCss;
+  casa = lado / (jogo ? jogo.tam : 5);
+  if (jogo) desenhar();
+}
+
+const centro = i => [(i % jogo.tam + 0.5) * casa, (Math.floor(i / jogo.tam) + 0.5) * casa];
+
+function clarear(hex, q) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  const f = v => Math.round(v + (255 - v) * q);
+  return `rgb(${f(r)},${f(g)},${f(b)})`;
+}
+function escurecer(hex, q) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = v => Math.round(v * (1 - q));
+  return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+}
+
+function desenhar() {
+  const t = jogo.tam;
+  ctx.clearRect(0, 0, lado, lado);
+
+  // Tecido de linho: tramas finas
+  ctx.fillStyle = "#efe6d6"; ctx.fillRect(0, 0, lado, lado);
+  ctx.globalAlpha = .08; ctx.fillStyle = "#6b5a3a";
+  for (let x = 0; x < lado; x += 4) ctx.fillRect(x, 0, 1, lado);
+  for (let y = 0; y < lado; y += 4) ctx.fillRect(0, y, lado, 1);
+  ctx.globalAlpha = 1;
+
+  // Cor de fundo das casas ocupadas
+  jogo.fios.forEach((f, cor) => {
+    ctx.fillStyle = clarear(CORES[cor], .72);
+    f.forEach(i => ctx.fillRect((i % t) * casa, Math.floor(i / t) * casa, casa, casa));
+  });
+
+  // Costura entre as casas
+  ctx.strokeStyle = "rgba(90,70,40,.28)"; ctx.lineWidth = 1.2;
+  ctx.setLineDash([casa * 0.12, casa * 0.09]);
+  for (let k = 1; k < t; k++) {
+    ctx.beginPath(); ctx.moveTo(k * casa, 0); ctx.lineTo(k * casa, lado); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, k * casa); ctx.lineTo(lado, k * casa); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Fios de lã
+  jogo.fios.forEach((f, cor) => {
+    if (f.length < 2) return;
+    const tracar = () => { ctx.beginPath(); f.forEach((i, k) => { const [x, y] = centro(i); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); };
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    tracar(); ctx.strokeStyle = escurecer(CORES[cor], .25); ctx.lineWidth = casa * .4; ctx.stroke();
+    tracar(); ctx.strokeStyle = CORES[cor]; ctx.lineWidth = casa * .32; ctx.stroke();
+    // torção da lã
+    tracar(); ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = casa * .08;
+    ctx.setLineDash([casa * .14, casa * .12]); ctx.stroke(); ctx.setLineDash([]);
+  });
+
+  // Botões
+  jogo.botoes.forEach((cor, i) => {
+    const [x, y] = centro(i);
+    const r = casa * .33;
+    ctx.beginPath(); ctx.arc(x + 1.5, y + 2.5, r, 0, Math.PI * 2); ctx.fillStyle = "rgba(0,0,0,.2)"; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = CORES[cor]; ctx.fill();
+    ctx.lineWidth = Math.max(2, casa * .04); ctx.strokeStyle = escurecer(CORES[cor], .35); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y, r * .72, 0, Math.PI * 2); ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = Math.max(1.5, casa * .03); ctx.stroke();
+    const d = r * .26, rf = Math.max(1.5, r * .12);
+    ctx.fillStyle = escurecer(CORES[cor], .5);
+    for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { ctx.beginPath(); ctx.arc(x + dx * d, y + dy * d, rf, 0, Math.PI * 2); ctx.fill(); }
+    if (ligado(cor)) {
+      ctx.beginPath(); ctx.arc(x, y, r + casa * .06, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255,255,255,.8)"; ctx.lineWidth = 2; ctx.stroke();
+    }
+  });
+}
+
+function atualizar() {
+  const total = jogo.tam * jogo.tam;
+  const coberto = new Set(jogo.fios.flat()).size;
+  const qtd = jogo.solucao.length;
+  const ligados = jogo.fios.filter((_, c) => ligado(c)).length;
+  $("nivel").textContent = jogo.nivel;
+  $("ligados").textContent = `${ligados}/${qtd}`;
+  $("coberto").textContent = Math.floor(coberto / total * 100) + "%";
+  $("tracos").textContent = jogo.tracos;
+  $("anterior").disabled = jogo.nivel <= 1;
+  $("proxima").disabled = jogo.nivel >= progresso.maximo;
+
+  const st = $("status");
+  st.className = "status";
+  if (ligados === qtd && coberto < total) st.textContent = `Todas as cores ligadas! Falta cobrir ${total - coberto} ${total - coberto === 1 ? "quadradinho" : "quadradinhos"}.`;
+  else if (ligados === 0 && coberto === 0) st.textContent = `${qtd} pares de botões num tecido ${jogo.tam}×${jogo.tam}.`;
+  else st.textContent = `${ligados} de ${qtd} cores ligadas.`;
+  desenhar();
+
+  if (!jogo.venceu && ligados === qtd && coberto === total && arrastando === null) vencer();
+}
+
+function vencer() {
+  jogo.venceu = true;
+  $("status").textContent = "Tecido completo!";
+  $("status").className = "status ok";
+  progresso.maximo = Math.max(progresso.maximo, jogo.nivel + 1);
+  salvarProgresso();
+  $("proxima").disabled = false;
+  const qtd = jogo.solucao.length;
+  const estrelas = jogo.tracos <= qtd ? 3 : jogo.tracos <= qtd + 3 ? 2 : 1;
+  setTimeout(() => {
+    const el = document.createElement("div");
+    el.className = "vitoria";
+    el.innerHTML = `<div class="cartao" role="dialog" aria-label="Fase concluída">
+      <h2>Bordado pronto!</h2>
+      <div class="estrelas">${[1, 2, 3].map(k => `<span class="${k <= estrelas ? "on" : "off"}">★</span>`).join("")}</div>
+      <p>${jogo.tracos} traços${estrelas < 3 ? `. Perfeito seria ${qtd}: uma vez cada cor.` : ". Perfeito!"}</p>
+      <div class="lista">
+        <button class="btn forte" id="seguir">Próxima fase</button>
+        <button class="btn" id="repetir">Jogar de novo</button>
+      </div>
+    </div>`;
+    document.body.appendChild(el);
+    $("seguir").onclick = () => iniciarFase(jogo.nivel + 1);
+    $("repetir").onclick = () => iniciarFase(jogo.nivel);
+    $("seguir").focus();
+  }, 450);
+}
+
+/* ---------- Mouse e toque ---------- */
+function casaDoPonteiro(e) {
+  const box = tela.getBoundingClientRect();
+  const x = (e.clientX - box.left) / box.width * jogo.tam;
+  const y = (e.clientY - box.top) / box.height * jogo.tam;
+  if (x < 0 || y < 0 || x >= jogo.tam || y >= jogo.tam) return -1;
+  return Math.floor(y) * jogo.tam + Math.floor(x);
+}
+tela.addEventListener("pointerdown", e => {
+  if (jogo.venceu) return;
+  const i = casaDoPonteiro(e);
+  if (i < 0) return;
+  tela.setPointerCapture(e.pointerId);
+  comecar(i);
+});
+tela.addEventListener("pointermove", e => {
+  if (arrastando === null) return;
+  const i = casaDoPonteiro(e);
+  if (i >= 0) arrastarAte(i);
+});
+const soltar = () => { if (arrastando !== null) { arrastando = null; atualizar(); } };
+tela.addEventListener("pointerup", soltar);
+tela.addEventListener("pointercancel", soltar);
+
+$("btnDica").onclick = darDica;
+$("btnLimpar").onclick = () => { jogo.fios = jogo.fios.map(() => []); jogo.ultimaCor = -1; atualizar(); };
+$("anterior").onclick = () => iniciarFase(Math.max(1, jogo.nivel - 1));
+$("proxima").onclick = () => iniciarFase(Math.min(progresso.maximo, jogo.nivel + 1));
+addEventListener("resize", ajustarTela);
+
+iniciarFase(Math.min(progresso.nivel || 1, progresso.maximo || 1));
+</script>
+
+</body></html>
